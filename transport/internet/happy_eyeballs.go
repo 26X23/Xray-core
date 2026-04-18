@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/xtls/xray-core/common/errors"
 	"github.com/xtls/xray-core/common/net"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"time"
 )
 
@@ -13,7 +14,7 @@ type result struct {
 	index int
 }
 
-func TcpRaceDial(ctx context.Context, src net.Address, ips []net.IP, port net.Port, sockopt *SocketConfig, domain string) (net.Conn, error) {
+func TcpRaceDial(ctx context.Context, src net.Address, ips []net.IP, port net.Port, sockopt *socket.SocketConfig, domain string) (net.Conn, error) {
 	if len(ips) < 2 {
 		panic("at least 2 ips is required to race dial")
 	}
@@ -155,7 +156,7 @@ func sortIPs(ips []net.IP, prioritizeIPv6 bool, interleave uint32) []net.IP {
 	return newIPs
 }
 
-func tcpTryDial(ctx context.Context, src net.Address, sockopt *SocketConfig, ip net.IP, port net.Port, index int, resultCh chan<- *result) {
+func tcpTryDial(ctx context.Context, src net.Address, sockopt *socket.SocketConfig, ip net.IP, port net.Port, index int, resultCh chan<- *result) {
 	conn, err := effectiveSystemDialer.Dial(ctx, src, net.Destination{Address: net.IPAddress(ip), Network: net.Network_TCP, Port: port}, sockopt)
 	select {
 	case <-ctx.Done():

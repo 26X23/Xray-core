@@ -25,6 +25,7 @@ import (
 	"github.com/xtls/xray-core/transport/internet/hysteria/congestion"
 	"github.com/xtls/xray-core/transport/internet/hysteria/congestion/bbr"
 	"github.com/xtls/xray-core/transport/internet/hysteria/udphop"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"github.com/xtls/xray-core/transport/internet/stat"
 	"github.com/xtls/xray-core/transport/internet/tls"
 )
@@ -119,7 +120,7 @@ type client struct {
 	conn           *quic.Conn
 	config         *Config
 	tlsConfig      *go_tls.Config
-	socketConfig   *internet.SocketConfig
+	socketConfig   *socket.SocketConfig
 	udpmaskManager *finalmask.UdpmaskManager
 	quicParams     *internet.QuicParams
 
@@ -212,7 +213,7 @@ func (c *client) dial() error {
 	}
 
 	if c.udpmaskManager != nil {
-		pktConn, err = c.udpmaskManager.WrapPacketConnClient(pktConn)
+		pktConn, err = c.udpmaskManager.WrapPacketConnClient(pktConn, c.socketConfig)
 		if err != nil {
 			raw.Close()
 			return errors.New("mask err").Base(err)

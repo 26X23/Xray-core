@@ -11,6 +11,7 @@ import (
 	net "github.com/xtls/xray-core/common/net"
 	serial "github.com/xtls/xray-core/common/serial"
 	internet "github.com/xtls/xray-core/transport/internet"
+	socket "github.com/xtls/xray-core/transport/internet/socket"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -328,12 +329,12 @@ func (*OutboundConfig) Descriptor() ([]byte, []int) {
 type SenderConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Send traffic through the given IP. Only IP is allowed.
-	Via               *net.IPOrDomain         `protobuf:"bytes,1,opt,name=via,proto3" json:"via,omitempty"`
-	StreamSettings    *internet.StreamConfig  `protobuf:"bytes,2,opt,name=stream_settings,json=streamSettings,proto3" json:"stream_settings,omitempty"`
-	ProxySettings     *internet.ProxyConfig   `protobuf:"bytes,3,opt,name=proxy_settings,json=proxySettings,proto3" json:"proxy_settings,omitempty"`
-	MultiplexSettings *MultiplexingConfig     `protobuf:"bytes,4,opt,name=multiplex_settings,json=multiplexSettings,proto3" json:"multiplex_settings,omitempty"`
-	ViaCidr           string                  `protobuf:"bytes,5,opt,name=via_cidr,json=viaCidr,proto3" json:"via_cidr,omitempty"`
-	TargetStrategy    internet.DomainStrategy `protobuf:"varint,6,opt,name=target_strategy,json=targetStrategy,proto3,enum=xray.transport.internet.DomainStrategy" json:"target_strategy,omitempty"`
+	Via               *net.IPOrDomain        `protobuf:"bytes,1,opt,name=via,proto3" json:"via,omitempty"`
+	StreamSettings    *internet.StreamConfig `protobuf:"bytes,2,opt,name=stream_settings,json=streamSettings,proto3" json:"stream_settings,omitempty"`
+	ProxySettings     *internet.ProxyConfig  `protobuf:"bytes,3,opt,name=proxy_settings,json=proxySettings,proto3" json:"proxy_settings,omitempty"`
+	MultiplexSettings *MultiplexingConfig    `protobuf:"bytes,4,opt,name=multiplex_settings,json=multiplexSettings,proto3" json:"multiplex_settings,omitempty"`
+	ViaCidr           string                 `protobuf:"bytes,5,opt,name=via_cidr,json=viaCidr,proto3" json:"via_cidr,omitempty"`
+	TargetStrategy    socket.DomainStrategy  `protobuf:"varint,6,opt,name=target_strategy,json=targetStrategy,proto3,enum=xray.transport.internet.socket.DomainStrategy" json:"target_strategy,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -403,11 +404,11 @@ func (x *SenderConfig) GetViaCidr() string {
 	return ""
 }
 
-func (x *SenderConfig) GetTargetStrategy() internet.DomainStrategy {
+func (x *SenderConfig) GetTargetStrategy() socket.DomainStrategy {
 	if x != nil {
 		return x.TargetStrategy
 	}
-	return internet.DomainStrategy(0)
+	return socket.DomainStrategy(0)
 }
 
 type MultiplexingConfig struct {
@@ -486,7 +487,7 @@ var File_app_proxyman_config_proto protoreflect.FileDescriptor
 
 const file_app_proxyman_config_proto_rawDesc = "" +
 	"\n" +
-	"\x19app/proxyman/config.proto\x12\x11xray.app.proxyman\x1a\x18common/net/address.proto\x1a\x15common/net/port.proto\x1a\x1ftransport/internet/config.proto\x1a!common/serial/typed_message.proto\x1a\x1bcommon/geodata/geodat.proto\"\x0f\n" +
+	"\x19app/proxyman/config.proto\x12\x11xray.app.proxyman\x1a\x18common/net/address.proto\x1a\x15common/net/port.proto\x1a\x1ftransport/internet/config.proto\x1a&transport/internet/socket/config.proto\x1a!common/serial/typed_message.proto\x1a\x1bcommon/geodata/geodat.proto\"\x0f\n" +
 	"\rInboundConfig\"\xad\x02\n" +
 	"\x0eSniffingConfig\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\x121\n" +
@@ -506,14 +507,14 @@ const file_app_proxyman_config_proto_rawDesc = "" +
 	"\x03tag\x18\x01 \x01(\tR\x03tag\x12M\n" +
 	"\x11receiver_settings\x18\x02 \x01(\v2 .xray.common.serial.TypedMessageR\x10receiverSettings\x12G\n" +
 	"\x0eproxy_settings\x18\x03 \x01(\v2 .xray.common.serial.TypedMessageR\rproxySettings\"\x10\n" +
-	"\x0eOutboundConfig\"\x9d\x03\n" +
+	"\x0eOutboundConfig\"\xa4\x03\n" +
 	"\fSenderConfig\x12-\n" +
 	"\x03via\x18\x01 \x01(\v2\x1b.xray.common.net.IPOrDomainR\x03via\x12N\n" +
 	"\x0fstream_settings\x18\x02 \x01(\v2%.xray.transport.internet.StreamConfigR\x0estreamSettings\x12K\n" +
 	"\x0eproxy_settings\x18\x03 \x01(\v2$.xray.transport.internet.ProxyConfigR\rproxySettings\x12T\n" +
 	"\x12multiplex_settings\x18\x04 \x01(\v2%.xray.app.proxyman.MultiplexingConfigR\x11multiplexSettings\x12\x19\n" +
-	"\bvia_cidr\x18\x05 \x01(\tR\aviaCidr\x12P\n" +
-	"\x0ftarget_strategy\x18\x06 \x01(\x0e2'.xray.transport.internet.DomainStrategyR\x0etargetStrategy\"\xa4\x01\n" +
+	"\bvia_cidr\x18\x05 \x01(\tR\aviaCidr\x12W\n" +
+	"\x0ftarget_strategy\x18\x06 \x01(\x0e2..xray.transport.internet.socket.DomainStrategyR\x0etargetStrategy\"\xa4\x01\n" +
 	"\x12MultiplexingConfig\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\x12 \n" +
 	"\vconcurrency\x18\x02 \x01(\x05R\vconcurrency\x12(\n" +
@@ -549,7 +550,7 @@ var file_app_proxyman_config_proto_goTypes = []any{
 	(*internet.StreamConfig)(nil), // 11: xray.transport.internet.StreamConfig
 	(*serial.TypedMessage)(nil),   // 12: xray.common.serial.TypedMessage
 	(*internet.ProxyConfig)(nil),  // 13: xray.transport.internet.ProxyConfig
-	(internet.DomainStrategy)(0),  // 14: xray.transport.internet.DomainStrategy
+	(socket.DomainStrategy)(0),    // 14: xray.transport.internet.socket.DomainStrategy
 }
 var file_app_proxyman_config_proto_depIdxs = []int32{
 	7,  // 0: xray.app.proxyman.SniffingConfig.domains_excluded:type_name -> xray.common.geodata.DomainRule
@@ -564,7 +565,7 @@ var file_app_proxyman_config_proto_depIdxs = []int32{
 	11, // 9: xray.app.proxyman.SenderConfig.stream_settings:type_name -> xray.transport.internet.StreamConfig
 	13, // 10: xray.app.proxyman.SenderConfig.proxy_settings:type_name -> xray.transport.internet.ProxyConfig
 	6,  // 11: xray.app.proxyman.SenderConfig.multiplex_settings:type_name -> xray.app.proxyman.MultiplexingConfig
-	14, // 12: xray.app.proxyman.SenderConfig.target_strategy:type_name -> xray.transport.internet.DomainStrategy
+	14, // 12: xray.app.proxyman.SenderConfig.target_strategy:type_name -> xray.transport.internet.socket.DomainStrategy
 	13, // [13:13] is the sub-list for method output_type
 	13, // [13:13] is the sub-list for method input_type
 	13, // [13:13] is the sub-list for extension type_name

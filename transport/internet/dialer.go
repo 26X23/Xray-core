@@ -15,6 +15,7 @@ import (
 	"github.com/xtls/xray-core/features/outbound"
 	"github.com/xtls/xray-core/transport"
 	"github.com/xtls/xray-core/transport/internet/stat"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"github.com/xtls/xray-core/transport/pipe"
 )
 
@@ -84,7 +85,7 @@ var (
 	obm       outbound.Manager
 )
 
-func LookupForIP(domain string, strategy DomainStrategy, localAddr net.Address) ([]net.IP, error) {
+func LookupForIP(domain string, strategy socket.DomainStrategy, localAddr net.Address) ([]net.IP, error) {
 	if dnsClient == nil {
 		return nil, errors.New("DNS client not initialized").AtError()
 	}
@@ -136,35 +137,35 @@ func redirect(ctx context.Context, dst net.Destination, obt string, h outbound.H
 
 }
 
-func checkAddressPortStrategy(ctx context.Context, dest net.Destination, sockopt *SocketConfig) (*net.Destination, error) {
-	if sockopt.AddressPortStrategy == AddressPortStrategy_None {
+func checkAddressPortStrategy(ctx context.Context, dest net.Destination, sockopt *socket.SocketConfig) (*net.Destination, error) {
+	if sockopt.AddressPortStrategy == socket.AddressPortStrategy_None {
 		return nil, nil
 	}
 	newDest := dest
 	var OverridePort, OverrideAddress bool
 	var OverrideBy string
 	switch sockopt.AddressPortStrategy {
-	case AddressPortStrategy_SrvPortOnly:
+	case socket.AddressPortStrategy_SrvPortOnly:
 		OverridePort = true
 		OverrideAddress = false
 		OverrideBy = "srv"
-	case AddressPortStrategy_SrvAddressOnly:
+	case socket.AddressPortStrategy_SrvAddressOnly:
 		OverridePort = false
 		OverrideAddress = true
 		OverrideBy = "srv"
-	case AddressPortStrategy_SrvPortAndAddress:
+	case socket.AddressPortStrategy_SrvPortAndAddress:
 		OverridePort = true
 		OverrideAddress = true
 		OverrideBy = "srv"
-	case AddressPortStrategy_TxtPortOnly:
+	case socket.AddressPortStrategy_TxtPortOnly:
 		OverridePort = true
 		OverrideAddress = false
 		OverrideBy = "txt"
-	case AddressPortStrategy_TxtAddressOnly:
+	case socket.AddressPortStrategy_TxtAddressOnly:
 		OverridePort = false
 		OverrideAddress = true
 		OverrideBy = "txt"
-	case AddressPortStrategy_TxtPortAndAddress:
+	case socket.AddressPortStrategy_TxtPortAndAddress:
 		OverridePort = true
 		OverrideAddress = true
 		OverrideBy = "txt"
@@ -224,7 +225,7 @@ func checkAddressPortStrategy(ctx context.Context, dest net.Destination, sockopt
 }
 
 // DialSystem calls system dialer to create a network connection.
-func DialSystem(ctx context.Context, dest net.Destination, sockopt *SocketConfig) (net.Conn, error) {
+func DialSystem(ctx context.Context, dest net.Destination, sockopt *socket.SocketConfig) (net.Conn, error) {
 	var src net.Address
 	outbounds := session.OutboundsFromContext(ctx)
 	var outboundName string

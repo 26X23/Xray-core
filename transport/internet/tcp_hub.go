@@ -5,6 +5,7 @@ import (
 
 	"github.com/xtls/xray-core/common/errors"
 	"github.com/xtls/xray-core/common/net"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"github.com/xtls/xray-core/transport/internet/stat"
 )
 
@@ -81,13 +82,13 @@ func ListenTCP(ctx context.Context, address net.Address, port net.Port, settings
 // ListenSystem listens on a local address for incoming TCP connections.
 //
 // xray:api:beta
-func ListenSystem(ctx context.Context, addr net.Addr, sockopt *SocketConfig) (net.Listener, error) {
+func ListenSystem(ctx context.Context, addr net.Addr, sockopt *socket.SocketConfig) (net.Listener, error) {
 	return effectiveListener.Listen(ctx, addr, sockopt)
 }
 
 // ListenSystemPacket listens on a local address for incoming UDP connections.
 //
 // xray:api:beta
-func ListenSystemPacket(ctx context.Context, addr net.Addr, sockopt *SocketConfig) (net.PacketConn, error) {
+func ListenSystemPacket(ctx context.Context, addr net.Addr, sockopt *socket.SocketConfig) (net.PacketConn, error) {
 	return effectiveListener.ListenPacket(ctx, addr, sockopt)
 }

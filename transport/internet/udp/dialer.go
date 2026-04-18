@@ -9,13 +9,14 @@ import (
 	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/common/net/cnc"
 	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"github.com/xtls/xray-core/transport/internet/stat"
 )
 
 func init() {
 	common.Must(internet.RegisterTransportDialer(protocolName,
 		func(ctx context.Context, dest net.Destination, streamSettings *internet.MemoryStreamConfig) (stat.Connection, error) {
-			var sockopt *internet.SocketConfig
+			var sockopt *socket.SocketConfig
 			if streamSettings != nil {
 				sockopt = streamSettings.SocketSettings
 			}
@@ -27,7 +28,7 @@ func init() {
 			if streamSettings != nil && streamSettings.UdpmaskManager != nil {
 				switch c := conn.(type) {
 				case *internet.PacketConnWrapper:
-					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c.PacketConn)
+					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c.PacketConn, sockopt)
 					if err != nil {
 						conn.Close()
 						return nil, errors.New("mask err").Base(err)
@@ -35,7 +36,7 @@ func init() {
 					c.PacketConn = pktConn
 					errors.LogInfo(ctx, "finalmask udp dialer: wrapped existing PacketConnWrapper with ", reflect.TypeOf(pktConn))
 				case *net.UDPConn:
-					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c)
+					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c, sockopt)
 					if err != nil {
 						conn.Close()
 						return nil, errors.New("mask err").Base(err)
@@ -47,7 +48,7 @@ func init() {
 					errors.LogInfo(ctx, "finalmask udp dialer: wrapped UDPConn with ", reflect.TypeOf(pktConn))
 				case *cnc.Connection:
 					fakeConn := &internet.FakePacketConn{Conn: c}
-					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(fakeConn)
+					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(fakeConn, sockopt)
 					if err != nil {
 						conn.Close()
 						return nil, errors.New("mask err").Base(err)

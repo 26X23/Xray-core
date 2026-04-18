@@ -11,6 +11,7 @@ import (
 
 	"github.com/xtls/xray-core/common/errors"
 	"github.com/xtls/xray-core/common/net"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"golang.org/x/sys/unix"
 )
 
@@ -100,7 +101,7 @@ func OriginalDst(la, ra net.Addr) (net.IP, int, error) {
 	return odIP, int(net.PortFromBytes(odPort[:2])), nil
 }
 
-func applyOutboundSocketOptions(network string, address string, fd uintptr, config *SocketConfig) error {
+func ApplyOutboundSocketOptions(network string, address string, fd uintptr, config *socket.SocketConfig) error {
 	if isTCPSocket(network) {
 		tfo := config.ParseTFOValue()
 		if tfo > 0 {
@@ -191,7 +192,7 @@ func applyOutboundSocketOptions(network string, address string, fd uintptr, conf
 	return nil
 }
 
-func applyInboundSocketOptions(network string, fd uintptr, config *SocketConfig) error {
+func applyInboundSocketOptions(network string, fd uintptr, config *socket.SocketConfig) error {
 	if isTCPSocket(network) {
 		tfo := config.ParseTFOValue()
 		if tfo > 0 {

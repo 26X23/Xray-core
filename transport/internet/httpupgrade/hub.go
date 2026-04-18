@@ -12,6 +12,7 @@ import (
 	"github.com/xtls/xray-core/common/net"
 	http_proto "github.com/xtls/xray-core/common/protocol/http"
 	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"github.com/xtls/xray-core/transport/internet/stat"
 	v2tls "github.com/xtls/xray-core/transport/internet/tls"
 )
@@ -20,7 +21,7 @@ type server struct {
 	config         *Config
 	addConn        internet.ConnHandler
 	innnerListener net.Listener
-	socketSettings *internet.SocketConfig
+	socketSettings *socket.SocketConfig
 }
 
 func (s *server) Close() error {
@@ -116,7 +117,7 @@ func ListenHTTPUpgrade(ctx context.Context, address net.Address, port net.Port, 
 	transportConfiguration := streamSettings.ProtocolSettings.(*Config)
 	if transportConfiguration != nil {
 		if streamSettings.SocketSettings == nil {
-			streamSettings.SocketSettings = &internet.SocketConfig{}
+			streamSettings.SocketSettings = &socket.SocketConfig{}
 		}
 		streamSettings.SocketSettings.AcceptProxyProtocol = transportConfiguration.AcceptProxyProtocol || streamSettings.SocketSettings.AcceptProxyProtocol
 	}

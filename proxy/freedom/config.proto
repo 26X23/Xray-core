@@ -7,7 +7,7 @@ option java_package = "com.xray.proxy.freedom";
 option java_multiple_files = true;
 
 import "common/protocol/server_spec.proto";
-import "transport/internet/config.proto";
+import "transport/internet/socket/config.proto";
 import "common/geodata/geodat.proto";
 
 message DestinationOverride {
@@ -38,7 +38,7 @@ message IPRules {
 }
 
 message Config {
-  xray.transport.internet.DomainStrategy domain_strategy = 1;
+  xray.transport.internet.socket.DomainStrategy domain_strategy = 1;
   DestinationOverride destination_override = 3;
   uint32 user_level = 4;
   Fragment fragment = 5;

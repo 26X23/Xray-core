@@ -41,6 +41,7 @@ import (
 	"github.com/xtls/xray-core/transport/internet/hysteria/congestion/bbr"
 	"github.com/xtls/xray-core/transport/internet/kcp"
 	"github.com/xtls/xray-core/transport/internet/reality"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"github.com/xtls/xray-core/transport/internet/splithttp"
 	"github.com/xtls/xray-core/transport/internet/tcp"
 	"github.com/xtls/xray-core/transport/internet/tls"
@@ -1077,7 +1078,7 @@ type SocketConfig struct {
 }
 
 // Build implements Buildable.
-func (c *SocketConfig) Build() (*internet.SocketConfig, error) {
+func (c *SocketConfig) Build() (*socket.SocketConfig, error) {
 	tfo := int32(0) // don't invoke setsockopt() for TFO
 	if c.TFO != nil {
 		switch v := c.TFO.(type) {
@@ -1093,48 +1094,48 @@ func (c *SocketConfig) Build() (*internet.SocketConfig, error) {
 			return nil, errors.New("tcpFastOpen: only boolean and integer value is acceptable")
 		}
 	}
-	var tproxy internet.SocketConfig_TProxyMode
+	var tproxy socket.SocketConfig_TProxyMode
 	switch strings.ToLower(c.TProxy) {
 	case "tproxy":
-		tproxy = internet.SocketConfig_TProxy
+		tproxy = socket.SocketConfig_TProxy
 	case "redirect":
-		tproxy = internet.SocketConfig_Redirect
+		tproxy = socket.SocketConfig_Redirect
 	default:
-		tproxy = internet.SocketConfig_Off
+		tproxy = socket.SocketConfig_Off
 	}
 
-	dStrategy := internet.DomainStrategy_AS_IS
+	dStrategy := socket.DomainStrategy_AS_IS
 	switch strings.ToLower(c.DomainStrategy) {
 	case "asis", "":
-		dStrategy = internet.DomainStrategy_AS_IS
+		dStrategy = socket.DomainStrategy_AS_IS
 	case "useip":
-		dStrategy = internet.DomainStrategy_USE_IP
+		dStrategy = socket.DomainStrategy_USE_IP
 	case "useipv4":
-		dStrategy = internet.DomainStrategy_USE_IP4
+		dStrategy = socket.DomainStrategy_USE_IP4
 	case "useipv6":
-		dStrategy = internet.DomainStrategy_USE_IP6
+		dStrategy = socket.DomainStrategy_USE_IP6
 	case "useipv4v6":
-		dStrategy = internet.DomainStrategy_USE_IP46
+		dStrategy = socket.DomainStrategy_USE_IP46
 	case "useipv6v4":
-		dStrategy = internet.DomainStrategy_USE_IP64
+		dStrategy = socket.DomainStrategy_USE_IP64
 	case "forceip":
-		dStrategy = internet.DomainStrategy_FORCE_IP
+		dStrategy = socket.DomainStrategy_FORCE_IP
 	case "forceipv4":
-		dStrategy = internet.DomainStrategy_FORCE_IP4
+		dStrategy = socket.DomainStrategy_FORCE_IP4
 	case "forceipv6":
-		dStrategy = internet.DomainStrategy_FORCE_IP6
+		dStrategy = socket.DomainStrategy_FORCE_IP6
 	case "forceipv4v6":
-		dStrategy = internet.DomainStrategy_FORCE_IP46
+		dStrategy = socket.DomainStrategy_FORCE_IP46
 	case "forceipv6v4":
-		dStrategy = internet.DomainStrategy_FORCE_IP64
+		dStrategy = socket.DomainStrategy_FORCE_IP64
 	default:
 		return nil, errors.New("unsupported domain strategy: ", c.DomainStrategy)
 	}
 
-	var customSockopts []*internet.CustomSockopt
+	var customSockopts []*socket.CustomSockopt
 
 	for _, copt := range c.CustomSockopt {
-		customSockopt := &internet.CustomSockopt{
+		customSockopt := &socket.CustomSockopt{
 			System:  copt.Syetem,
 			Network: copt.Network,
 			Level:   copt.Level,
@@ -1145,27 +1146,27 @@ func (c *SocketConfig) Build() (*internet.SocketConfig, error) {
 		customSockopts = append(customSockopts, customSockopt)
 	}
 
-	addressPortStrategy := internet.AddressPortStrategy_None
+	addressPortStrategy := socket.AddressPortStrategy_None
 	switch strings.ToLower(c.AddressPortStrategy) {
 	case "none", "":
-		addressPortStrategy = internet.AddressPortStrategy_None
+		addressPortStrategy = socket.AddressPortStrategy_None
 	case "srvportonly":
-		addressPortStrategy = internet.AddressPortStrategy_SrvPortOnly
+		addressPortStrategy = socket.AddressPortStrategy_SrvPortOnly
 	case "srvaddressonly":
-		addressPortStrategy = internet.AddressPortStrategy_SrvAddressOnly
+		addressPortStrategy = socket.AddressPortStrategy_SrvAddressOnly
 	case "srvportandaddress":
-		addressPortStrategy = internet.AddressPortStrategy_SrvPortAndAddress
+		addressPortStrategy = socket.AddressPortStrategy_SrvPortAndAddress
 	case "txtportonly":
-		addressPortStrategy = internet.AddressPortStrategy_TxtPortOnly
+		addressPortStrategy = socket.AddressPortStrategy_TxtPortOnly
 	case "txtaddressonly":
-		addressPortStrategy = internet.AddressPortStrategy_TxtAddressOnly
+		addressPortStrategy = socket.AddressPortStrategy_TxtAddressOnly
 	case "txtportandaddress":
-		addressPortStrategy = internet.AddressPortStrategy_TxtPortAndAddress
+		addressPortStrategy = socket.AddressPortStrategy_TxtPortAndAddress
 	default:
 		return nil, errors.New("unsupported address and port strategy: ", c.AddressPortStrategy)
 	}
 
-	var happyEyeballs = &internet.HappyEyeballsConfig{Interleave: 1, PrioritizeIpv6: false, TryDelayMs: 0, MaxConcurrentTry: 4}
+	var happyEyeballs = &socket.HappyEyeballsConfig{Interleave: 1, PrioritizeIpv6: false, TryDelayMs: 0, MaxConcurrentTry: 4}
 	if c.HappyEyeballsSettings != nil {
 		happyEyeballs.PrioritizeIpv6 = c.HappyEyeballsSettings.PrioritizeIPv6
 		happyEyeballs.Interleave = c.HappyEyeballsSettings.Interleave
@@ -1173,7 +1174,7 @@ func (c *SocketConfig) Build() (*internet.SocketConfig, error) {
 		happyEyeballs.MaxConcurrentTry = c.HappyEyeballsSettings.MaxConcurrentTry
 	}
 
-	return &internet.SocketConfig{
+	return &socket.SocketConfig{
 		Mark:                 c.Mark,
 		Tfo:                  tfo,
 		Tproxy:               tproxy,

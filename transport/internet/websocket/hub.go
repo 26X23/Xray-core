@@ -17,6 +17,7 @@ import (
 	"github.com/xtls/xray-core/common/net"
 	http_proto "github.com/xtls/xray-core/common/protocol/http"
 	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	v2tls "github.com/xtls/xray-core/transport/internet/tls"
 )
 
@@ -24,7 +25,7 @@ type requestHandler struct {
 	host           string
 	path           string
 	ln             *Listener
-	socketSettings *internet.SocketConfig
+	socketSettings *socket.SocketConfig
 }
 
 var replacer = strings.NewReplacer("+", "-", "/", "_", "=", "")
@@ -103,7 +104,7 @@ func ListenWS(ctx context.Context, address net.Address, port net.Port, streamSet
 	l.config = wsSettings
 	if l.config != nil {
 		if streamSettings.SocketSettings == nil {
-			streamSettings.SocketSettings = &internet.SocketConfig{}
+			streamSettings.SocketSettings = &socket.SocketConfig{}
 		}
 		streamSettings.SocketSettings.AcceptProxyProtocol = l.config.AcceptProxyProtocol || streamSettings.SocketSettings.AcceptProxyProtocol
 	}

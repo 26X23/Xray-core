@@ -7,7 +7,7 @@ import (
 	"github.com/xtls/xray-core/common/protocol"
 	. "github.com/xtls/xray-core/infra/conf"
 	"github.com/xtls/xray-core/proxy/freedom"
-	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/socket"
 )
 
 func TestFreedomConfig(t *testing.T) {
@@ -24,7 +24,7 @@ func TestFreedomConfig(t *testing.T) {
 			}`,
 			Parser: loadJSON(creator),
 			Output: &freedom.Config{
-				DomainStrategy: internet.DomainStrategy_AS_IS,
+				DomainStrategy: socket.DomainStrategy_AS_IS,
 				DestinationOverride: &freedom.DestinationOverride{
 					Server: &protocol.ServerEndpoint{
 						Address: &net.IPOrDomain{

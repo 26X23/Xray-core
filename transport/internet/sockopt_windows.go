@@ -11,6 +11,7 @@ import (
 	"unsafe"
 
 	"github.com/xtls/xray-core/common/errors"
+	"github.com/xtls/xray-core/transport/internet/socket"
 )
 
 const (
@@ -31,7 +32,7 @@ func setTFO(fd syscall.Handle, tfo int) error {
 	return nil
 }
 
-func applyOutboundSocketOptions(network string, address string, fd uintptr, config *SocketConfig) error {
+func ApplyOutboundSocketOptions(network string, address string, fd uintptr, config *socket.SocketConfig) error {
 	if config.Interface != "" {
 		inf, err := net.InterfaceByName(config.Interface)
 		if err != nil {
@@ -120,7 +121,7 @@ func applyOutboundSocketOptions(network string, address string, fd uintptr, conf
 	return nil
 }
 
-func applyInboundSocketOptions(network string, fd uintptr, config *SocketConfig) error {
+func applyInboundSocketOptions(network string, fd uintptr, config *socket.SocketConfig) error {
 	if isTCPSocket(network) {
 		if err := setTFO(syscall.Handle(fd), config.ParseTFOValue()); err != nil {
 			return err

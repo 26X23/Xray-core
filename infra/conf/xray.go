@@ -15,6 +15,7 @@ import (
 	"github.com/xtls/xray-core/common/serial"
 	core "github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/socket"
 )
 
 var (
@@ -235,27 +236,27 @@ func (c *OutboundDetourConfig) Build() (*core.OutboundHandlerConfig, error) {
 	senderSettings := &proxyman.SenderConfig{}
 	switch strings.ToLower(c.TargetStrategy) {
 	case "asis", "":
-		senderSettings.TargetStrategy = internet.DomainStrategy_AS_IS
+		senderSettings.TargetStrategy = socket.DomainStrategy_AS_IS
 	case "useip":
-		senderSettings.TargetStrategy = internet.DomainStrategy_USE_IP
+		senderSettings.TargetStrategy = socket.DomainStrategy_USE_IP
 	case "useipv4":
-		senderSettings.TargetStrategy = internet.DomainStrategy_USE_IP4
+		senderSettings.TargetStrategy = socket.DomainStrategy_USE_IP4
 	case "useipv6":
-		senderSettings.TargetStrategy = internet.DomainStrategy_USE_IP6
+		senderSettings.TargetStrategy = socket.DomainStrategy_USE_IP6
 	case "useipv4v6":
-		senderSettings.TargetStrategy = internet.DomainStrategy_USE_IP46
+		senderSettings.TargetStrategy = socket.DomainStrategy_USE_IP46
 	case "useipv6v4":
-		senderSettings.TargetStrategy = internet.DomainStrategy_USE_IP64
+		senderSettings.TargetStrategy = socket.DomainStrategy_USE_IP64
 	case "forceip":
-		senderSettings.TargetStrategy = internet.DomainStrategy_FORCE_IP
+		senderSettings.TargetStrategy = socket.DomainStrategy_FORCE_IP
 	case "forceipv4":
-		senderSettings.TargetStrategy = internet.DomainStrategy_FORCE_IP4
+		senderSettings.TargetStrategy = socket.DomainStrategy_FORCE_IP4
 	case "forceipv6":
-		senderSettings.TargetStrategy = internet.DomainStrategy_FORCE_IP6
+		senderSettings.TargetStrategy = socket.DomainStrategy_FORCE_IP6
 	case "forceipv4v6":
-		senderSettings.TargetStrategy = internet.DomainStrategy_FORCE_IP46
+		senderSettings.TargetStrategy = socket.DomainStrategy_FORCE_IP46
 	case "forceipv6v4":
-		senderSettings.TargetStrategy = internet.DomainStrategy_FORCE_IP64
+		senderSettings.TargetStrategy = socket.DomainStrategy_FORCE_IP64
 	default:
 		return nil, errors.New("unsupported target domain strategy: ", c.TargetStrategy)
 	}
@@ -297,10 +298,10 @@ func (c *OutboundDetourConfig) Build() (*core.OutboundHandlerConfig, error) {
 				if senderSettings.StreamSettings.SocketSettings != nil {
 					senderSettings.StreamSettings.SocketSettings.DialerProxy = ps.Tag
 				} else {
-					senderSettings.StreamSettings.SocketSettings = &internet.SocketConfig{DialerProxy: ps.Tag}
+					senderSettings.StreamSettings.SocketSettings = &socket.SocketConfig{DialerProxy: ps.Tag}
 				}
 			} else {
-				senderSettings.StreamSettings = &internet.StreamConfig{SocketSettings: &internet.SocketConfig{DialerProxy: ps.Tag}}
+				senderSettings.StreamSettings = &internet.StreamConfig{SocketSettings: &socket.SocketConfig{DialerProxy: ps.Tag}}
 			}
 			ps = nil
 		}

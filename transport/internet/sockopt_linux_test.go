@@ -8,6 +8,7 @@ import (
 	"github.com/xtls/xray-core/common"
 	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/testing/servers/tcp"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	. "github.com/xtls/xray-core/transport/internet"
 )
 
@@ -25,7 +26,7 @@ func TestSockOptMark(t *testing.T) {
 
 	const mark = 1
 	dialer := DefaultSystemDialer{}
-	conn, err := dialer.Dial(context.Background(), nil, dest, &SocketConfig{Mark: mark})
+	conn, err := dialer.Dial(context.Background(), nil, dest, &socket.SocketConfig{Mark: mark})
 	common.Must(err)
 	defer conn.Close()
 

@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/xtls/xray-core/common/errors"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"golang.org/x/sys/unix"
 )
 
@@ -38,9 +39,9 @@ func bindAddr(fd uintptr, ip []byte, port uint32) error {
 	return syscall.Bind(int(fd), sockaddr)
 }
 
-// applyOutboundSocketOptions applies socket options for outbound connection.
+// ApplyOutboundSocketOptions applies socket options for outbound connection.
 // note that unlike other part of Xray, this function needs network with speified network stack(tcp4/tcp6/udp4/udp6)
-func applyOutboundSocketOptions(network string, address string, fd uintptr, config *SocketConfig) error {
+func ApplyOutboundSocketOptions(network string, address string, fd uintptr, config *socket.SocketConfig) error {
 	if config.Mark != 0 {
 		if err := syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_MARK, int(config.Mark)); err != nil {
 			return errors.New("failed to set SO_MARK").Base(err)
@@ -139,7 +140,7 @@ func applyOutboundSocketOptions(network string, address string, fd uintptr, conf
 
 // applyInboundSocketOptions applies socket options for inbound listener.
 // note that unlike other part of Xray, this function needs network with speified network stack(tcp4/tcp6/udp4/udp6)
-func applyInboundSocketOptions(network string, fd uintptr, config *SocketConfig) error {
+func applyInboundSocketOptions(network string, fd uintptr, config *socket.SocketConfig) error {
 	if config.Mark != 0 {
 		if err := syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_MARK, int(config.Mark)); err != nil {
 			return errors.New("failed to set SO_MARK").Base(err)

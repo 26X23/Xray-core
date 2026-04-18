@@ -21,6 +21,7 @@ import (
 	"github.com/xtls/xray-core/proxy/hysteria/account"
 	hyCtx "github.com/xtls/xray-core/proxy/hysteria/ctx"
 	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"github.com/xtls/xray-core/transport/internet/stat"
 	"github.com/xtls/xray-core/transport/internet/tcp"
 	"github.com/xtls/xray-core/transport/internet/udp"
@@ -51,9 +52,9 @@ type tcpWorker struct {
 	ctx context.Context
 }
 
-func getTProxyType(s *internet.MemoryStreamConfig) internet.SocketConfig_TProxyMode {
+func getTProxyType(s *internet.MemoryStreamConfig) socket.SocketConfig_TProxyMode {
 	if s == nil || s.SocketSettings == nil {
-		return internet.SocketConfig_Off
+		return socket.SocketConfig_Off
 	}
 	return s.SocketSettings.Tproxy
 }
@@ -67,14 +68,14 @@ func (w *tcpWorker) callback(conn stat.Connection) {
 	if w.recvOrigDest {
 		var dest net.Destination
 		switch getTProxyType(w.stream) {
-		case internet.SocketConfig_Redirect:
+		case socket.SocketConfig_Redirect:
 			d, err := tcp.GetOriginalDestination(conn)
 			if err != nil {
 				errors.LogInfoInner(ctx, err, "failed to get original destination")
 			} else {
 				dest = d
 			}
-		case internet.SocketConfig_TProxy:
+		case socket.SocketConfig_TProxy:
 			dest = net.DestinationFromAddr(conn.LocalAddr())
 		}
 

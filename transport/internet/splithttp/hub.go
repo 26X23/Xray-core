@@ -27,6 +27,7 @@ import (
 	"github.com/xtls/xray-core/transport/internet/hysteria/congestion"
 	"github.com/xtls/xray-core/transport/internet/hysteria/congestion/bbr"
 	"github.com/xtls/xray-core/transport/internet/reality"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"github.com/xtls/xray-core/transport/internet/stat"
 	"github.com/xtls/xray-core/transport/internet/tls"
 )
@@ -39,7 +40,7 @@ type requestHandler struct {
 	sessionMu      *sync.Mutex
 	sessions       sync.Map
 	localAddr      net.Addr
-	socketSettings *internet.SocketConfig
+	socketSettings *socket.SocketConfig
 }
 
 type httpSession struct {
@@ -453,7 +454,7 @@ func ListenXH(ctx context.Context, address net.Address, port net.Port, streamSet
 	l.config = streamSettings.ProtocolSettings.(*Config)
 	if l.config != nil {
 		if streamSettings.SocketSettings == nil {
-			streamSettings.SocketSettings = &internet.SocketConfig{}
+			streamSettings.SocketSettings = &socket.SocketConfig{}
 		}
 	}
 	handler := &requestHandler{

@@ -9,6 +9,7 @@ import (
 	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/common/task"
 	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"github.com/xtls/xray-core/transport/pipe"
 )
 
@@ -25,7 +26,7 @@ func (server *Server) Start() (net.Destination, error) {
 	return server.StartContext(context.Background(), nil)
 }
 
-func (server *Server) StartContext(ctx context.Context, sockopt *internet.SocketConfig) (net.Destination, error) {
+func (server *Server) StartContext(ctx context.Context, sockopt *socket.SocketConfig) (net.Destination, error) {
 	listenerAddr := server.Listen
 	if listenerAddr == nil {
 		listenerAddr = net.LocalHostIP

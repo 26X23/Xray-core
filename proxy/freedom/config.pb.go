@@ -9,7 +9,7 @@ package freedom
 import (
 	geodata "github.com/xtls/xray-core/common/geodata"
 	protocol "github.com/xtls/xray-core/common/protocol"
-	internet "github.com/xtls/xray-core/transport/internet"
+	socket "github.com/xtls/xray-core/transport/internet/socket"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -297,14 +297,14 @@ func (x *IPRules) GetRules() []*geodata.IPRule {
 }
 
 type Config struct {
-	state               protoimpl.MessageState  `protogen:"open.v1"`
-	DomainStrategy      internet.DomainStrategy `protobuf:"varint,1,opt,name=domain_strategy,json=domainStrategy,proto3,enum=xray.transport.internet.DomainStrategy" json:"domain_strategy,omitempty"`
-	DestinationOverride *DestinationOverride    `protobuf:"bytes,3,opt,name=destination_override,json=destinationOverride,proto3" json:"destination_override,omitempty"`
-	UserLevel           uint32                  `protobuf:"varint,4,opt,name=user_level,json=userLevel,proto3" json:"user_level,omitempty"`
-	Fragment            *Fragment               `protobuf:"bytes,5,opt,name=fragment,proto3" json:"fragment,omitempty"`
-	ProxyProtocol       uint32                  `protobuf:"varint,6,opt,name=proxy_protocol,json=proxyProtocol,proto3" json:"proxy_protocol,omitempty"`
-	Noises              []*Noise                `protobuf:"bytes,7,rep,name=noises,proto3" json:"noises,omitempty"`
-	IpsBlocked          *IPRules                `protobuf:"bytes,8,opt,name=ips_blocked,json=ipsBlocked,proto3,oneof" json:"ips_blocked,omitempty"`
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	DomainStrategy      socket.DomainStrategy  `protobuf:"varint,1,opt,name=domain_strategy,json=domainStrategy,proto3,enum=xray.transport.internet.socket.DomainStrategy" json:"domain_strategy,omitempty"`
+	DestinationOverride *DestinationOverride   `protobuf:"bytes,3,opt,name=destination_override,json=destinationOverride,proto3" json:"destination_override,omitempty"`
+	UserLevel           uint32                 `protobuf:"varint,4,opt,name=user_level,json=userLevel,proto3" json:"user_level,omitempty"`
+	Fragment            *Fragment              `protobuf:"bytes,5,opt,name=fragment,proto3" json:"fragment,omitempty"`
+	ProxyProtocol       uint32                 `protobuf:"varint,6,opt,name=proxy_protocol,json=proxyProtocol,proto3" json:"proxy_protocol,omitempty"`
+	Noises              []*Noise               `protobuf:"bytes,7,rep,name=noises,proto3" json:"noises,omitempty"`
+	IpsBlocked          *IPRules               `protobuf:"bytes,8,opt,name=ips_blocked,json=ipsBlocked,proto3,oneof" json:"ips_blocked,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -339,11 +339,11 @@ func (*Config) Descriptor() ([]byte, []int) {
 	return file_proxy_freedom_config_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *Config) GetDomainStrategy() internet.DomainStrategy {
+func (x *Config) GetDomainStrategy() socket.DomainStrategy {
 	if x != nil {
 		return x.DomainStrategy
 	}
-	return internet.DomainStrategy(0)
+	return socket.DomainStrategy(0)
 }
 
 func (x *Config) GetDestinationOverride() *DestinationOverride {
@@ -392,7 +392,7 @@ var File_proxy_freedom_config_proto protoreflect.FileDescriptor
 
 const file_proxy_freedom_config_proto_rawDesc = "" +
 	"\n" +
-	"\x1aproxy/freedom/config.proto\x12\x12xray.proxy.freedom\x1a!common/protocol/server_spec.proto\x1a\x1ftransport/internet/config.proto\x1a\x1bcommon/geodata/geodat.proto\"S\n" +
+	"\x1aproxy/freedom/config.proto\x12\x12xray.proxy.freedom\x1a!common/protocol/server_spec.proto\x1a&transport/internet/socket/config.proto\x1a\x1bcommon/geodata/geodat.proto\"S\n" +
 	"\x13DestinationOverride\x12<\n" +
 	"\x06server\x18\x01 \x01(\v2$.xray.common.protocol.ServerEndpointR\x06server\"\x98\x02\n" +
 	"\bFragment\x12!\n" +
@@ -417,9 +417,9 @@ const file_proxy_freedom_config_proto_rawDesc = "" +
 	"\x06packet\x18\x05 \x01(\fR\x06packet\x12\x19\n" +
 	"\bapply_to\x18\x06 \x01(\tR\aapplyTo\"<\n" +
 	"\aIPRules\x121\n" +
-	"\x05rules\x18\x01 \x03(\v2\x1b.xray.common.geodata.IPRuleR\x05rules\"\xbc\x03\n" +
-	"\x06Config\x12P\n" +
-	"\x0fdomain_strategy\x18\x01 \x01(\x0e2'.xray.transport.internet.DomainStrategyR\x0edomainStrategy\x12Z\n" +
+	"\x05rules\x18\x01 \x03(\v2\x1b.xray.common.geodata.IPRuleR\x05rules\"\xc3\x03\n" +
+	"\x06Config\x12W\n" +
+	"\x0fdomain_strategy\x18\x01 \x01(\x0e2..xray.transport.internet.socket.DomainStrategyR\x0edomainStrategy\x12Z\n" +
 	"\x14destination_override\x18\x03 \x01(\v2'.xray.proxy.freedom.DestinationOverrideR\x13destinationOverride\x12\x1d\n" +
 	"\n" +
 	"user_level\x18\x04 \x01(\rR\tuserLevel\x128\n" +
@@ -452,12 +452,12 @@ var file_proxy_freedom_config_proto_goTypes = []any{
 	(*Config)(nil),                  // 4: xray.proxy.freedom.Config
 	(*protocol.ServerEndpoint)(nil), // 5: xray.common.protocol.ServerEndpoint
 	(*geodata.IPRule)(nil),          // 6: xray.common.geodata.IPRule
-	(internet.DomainStrategy)(0),    // 7: xray.transport.internet.DomainStrategy
+	(socket.DomainStrategy)(0),      // 7: xray.transport.internet.socket.DomainStrategy
 }
 var file_proxy_freedom_config_proto_depIdxs = []int32{
 	5, // 0: xray.proxy.freedom.DestinationOverride.server:type_name -> xray.common.protocol.ServerEndpoint
 	6, // 1: xray.proxy.freedom.IPRules.rules:type_name -> xray.common.geodata.IPRule
-	7, // 2: xray.proxy.freedom.Config.domain_strategy:type_name -> xray.transport.internet.DomainStrategy
+	7, // 2: xray.proxy.freedom.Config.domain_strategy:type_name -> xray.transport.internet.socket.DomainStrategy
 	0, // 3: xray.proxy.freedom.Config.destination_override:type_name -> xray.proxy.freedom.DestinationOverride
 	1, // 4: xray.proxy.freedom.Config.fragment:type_name -> xray.proxy.freedom.Fragment
 	2, // 5: xray.proxy.freedom.Config.noises:type_name -> xray.proxy.freedom.Noise

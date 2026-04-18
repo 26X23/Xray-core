@@ -15,6 +15,7 @@ import (
 	"github.com/xtls/xray-core/features/stats"
 	"github.com/xtls/xray-core/proxy"
 	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/socket"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -99,10 +100,10 @@ func NewAlwaysOnInboundHandler(ctx context.Context, tag string, receiverConfig *
 
 	if receiverConfig.ReceiveOriginalDestination {
 		if mss.SocketSettings == nil {
-			mss.SocketSettings = &internet.SocketConfig{}
+			mss.SocketSettings = &socket.SocketConfig{}
 		}
-		if mss.SocketSettings.Tproxy == internet.SocketConfig_Off {
-			mss.SocketSettings.Tproxy = internet.SocketConfig_Redirect
+		if mss.SocketSettings.Tproxy == socket.SocketConfig_Off {
+			mss.SocketSettings.Tproxy = socket.SocketConfig_Redirect
 		}
 		mss.SocketSettings.ReceiveOriginalDestAddress = true
 	}

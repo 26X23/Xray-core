@@ -274,7 +274,7 @@ func createHTTPClient(dest net.Destination, streamSettings *internet.MemoryStrea
 				}
 
 				if streamSettings.UdpmaskManager != nil {
-					udpConn, err = streamSettings.UdpmaskManager.WrapPacketConnClient(udpConn)
+					udpConn, err = streamSettings.UdpmaskManager.WrapPacketConnClient(udpConn, streamSettings.SocketSettings)
 					if err != nil {
 						conn.Close()
 						return nil, errors.New("mask err").Base(err)

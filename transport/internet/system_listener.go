@@ -12,6 +12,7 @@ import (
 	"github.com/pires/go-proxyproto"
 	"github.com/xtls/xray-core/common/errors"
 	"github.com/xtls/xray-core/common/net"
+	"github.com/xtls/xray-core/transport/internet/socket"
 )
 
 var effectiveListener = DefaultListener{}
@@ -20,7 +21,7 @@ type DefaultListener struct {
 	controllers []func(network, address string, c syscall.RawConn) error
 }
 
-func getControlFunc(ctx context.Context, sockopt *SocketConfig, controllers []func(network, address string, c syscall.RawConn) error) func(network, address string, c syscall.RawConn) error {
+func getControlFunc(ctx context.Context, sockopt *socket.SocketConfig, controllers []func(network, address string, c syscall.RawConn) error) func(network, address string, c syscall.RawConn) error {
 	return func(network, address string, c syscall.RawConn) error {
 		return c.Control(func(fd uintptr) {
 			for _, controller := range controllers {
@@ -74,7 +75,7 @@ func (conn *UnixConnWrapper) RemoteAddr() net.Addr {
 	}
 }
 
-func (dl *DefaultListener) Listen(ctx context.Context, addr net.Addr, sockopt *SocketConfig) (l net.Listener, err error) {
+func (dl *DefaultListener) Listen(ctx context.Context, addr net.Addr, sockopt *socket.SocketConfig) (l net.Listener, err error) {
 	var lc net.ListenConfig
 	var network, address string
 	// callback is called after the Listen function returns
@@ -173,7 +174,7 @@ func (dl *DefaultListener) Listen(ctx context.Context, addr net.Addr, sockopt *S
 	return l, err
 }
 
-func (dl *DefaultListener) ListenPacket(ctx context.Context, addr net.Addr, sockopt *SocketConfig) (net.PacketConn, error) {
+func (dl *DefaultListener) ListenPacket(ctx context.Context, addr net.Addr, sockopt *socket.SocketConfig) (net.PacketConn, error) {
 	var lc net.ListenConfig
 
 	lc.Control = getControlFunc(ctx, sockopt, dl.controllers)

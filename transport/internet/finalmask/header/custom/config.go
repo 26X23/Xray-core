@@ -2,6 +2,7 @@ package custom
 
 import (
 	"net"
+	"github.com/xtls/xray-core/transport/internet/socket"
 )
 
 func (c *TCPConfig) TCP() {
@@ -18,7 +19,7 @@ func (c *TCPConfig) WrapConnServer(raw net.Conn) (net.Conn, error) {
 func (c *UDPConfig) UDP() {
 }
 
-func (c *UDPConfig) WrapPacketConnClient(raw net.PacketConn, level int, levelCount int) (net.PacketConn, error) {
+func (c *UDPConfig) WrapPacketConnClient(raw net.PacketConn, sockopt *socket.SocketConfig, level int, levelCount int) (net.PacketConn, error) {
 	if c.Mode == "standalone" {
 		return NewConnClientUDPStandalone(c, raw)
 	}

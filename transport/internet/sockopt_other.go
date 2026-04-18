@@ -3,11 +3,13 @@
 
 package internet
 
-func applyOutboundSocketOptions(network string, address string, fd uintptr, config *SocketConfig) error {
+import "github.com/xtls/xray-core/transport/internet/socket"
+
+func ApplyOutboundSocketOptions(network string, address string, fd uintptr, config *socket.SocketConfig) error {
 	return nil
 }
 
-func applyInboundSocketOptions(network string, fd uintptr, config *SocketConfig) error {
+func applyInboundSocketOptions(network string, fd uintptr, config *socket.SocketConfig) error {
 	return nil
 }
 

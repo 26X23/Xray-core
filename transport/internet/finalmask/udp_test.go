@@ -253,7 +253,7 @@ func newUDPClientServerPair(t *testing.T, cfg *custom.UDPConfig) (net.PacketConn
 
 	maskManager := finalmask.NewUdpmaskManager([]finalmask.Udpmask{cfg})
 
-	client, err := maskManager.WrapPacketConnClient(clientRaw)
+	client, err := maskManager.WrapPacketConnClient(clientRaw, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -380,7 +380,7 @@ func TestPacketConnReadWrite(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			client, err = maskManager.WrapPacketConnClient(client)
+			client, err = maskManager.WrapPacketConnClient(client, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -432,7 +432,7 @@ func TestUDPcustomStaticHeaderWireShape(t *testing.T) {
 	}
 	defer serverRaw.Close()
 
-	client, err := maskManager.WrapPacketConnClient(clientRaw)
+	client, err := maskManager.WrapPacketConnClient(clientRaw, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -941,7 +941,7 @@ func TestSudokuBDD(t *testing.T) {
 		}
 		defer raw.Close()
 
-		if _, err := cfg.WrapPacketConnClient(raw, 0, 1); err == nil {
+		if _, err := cfg.WrapPacketConnClient(raw, nil, 0, 1); err == nil {
 			t.Fatal("expected innermost check failure")
 		}
 	})
@@ -968,7 +968,7 @@ func TestSudokuBDD(t *testing.T) {
 		}
 		defer serverRaw.Close()
 
-		client, err := maskManager.WrapPacketConnClient(clientRaw)
+		client, err := maskManager.WrapPacketConnClient(clientRaw, nil)
 		if err != nil {
 			t.Fatal(err)
 		}

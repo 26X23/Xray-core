@@ -8,6 +8,7 @@ import (
 	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/common/protocol/udp"
 	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/socket"
 )
 
 type HubOption func(h *Hub)
@@ -49,7 +50,7 @@ func ListenUDP(ctx context.Context, address net.Address, port net.Port, streamSe
 		return nil, errors.New("domain address is not allowed for listening: ", address.Domain())
 	}
 
-	var sockopt *internet.SocketConfig
+	var sockopt *socket.SocketConfig
 	if streamSettings != nil {
 		sockopt = streamSettings.SocketSettings
 	}

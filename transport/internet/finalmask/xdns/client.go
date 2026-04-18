@@ -13,11 +13,14 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/xtls/xray-core/common"
 	"github.com/xtls/xray-core/common/errors"
+	"github.com/xtls/xray-core/transport/internet"
 	"github.com/xtls/xray-core/transport/internet/finalmask"
+	"github.com/xtls/xray-core/transport/internet/socket"
 )
 
 const (
@@ -54,7 +57,7 @@ type xdnsConnClient struct {
 	mutex  sync.Mutex
 }
 
-func NewConnClient(c *Config, raw net.PacketConn) (net.PacketConn, error) {
+func NewConnClient(c *Config, raw net.PacketConn, sockopt *socket.SocketConfig) (net.PacketConn, error) {
 	if len(c.Resolvers) == 0 {
 		return nil, errors.New("empty resolvers")
 	}
@@ -72,6 +75,22 @@ func NewConnClient(c *Config, raw net.PacketConn) (net.PacketConn, error) {
 		}
 		domains = append(domains, domain)
 		servers = append(servers, parts[1])
+	}
+
+	var lc net.ListenConfig
+	lc.Control = func(network, address string, c syscall.RawConn) error {
+		for _, ctl := range internet.Controllers {
+			if err := ctl(network, address, c); err != nil {
+				errors.LogInfoInner(context.Background(), err, "failed to apply external controller")
+			}
+		}
+		return c.Control(func(fd uintptr) {
+			if sockopt != nil {
+				if err := internet.ApplyOutboundSocketOptions(network, address, fd, sockopt); err != nil {
+					errors.LogInfo(context.Background(), err, "failed to apply socket options")
+				}
+			}
+		})
 	}
 
 	var resolverConns []net.PacketConn
@@ -92,9 +111,9 @@ func NewConnClient(c *Config, raw net.PacketConn) (net.PacketConn, error) {
 		}
 		var uc net.PacketConn
 		if ip.To4() != nil {
-			uc, err = net.ListenPacket("udp4", ":0")
+			uc, err = lc.ListenPacket(context.Background(), "udp4", ":0")
 		} else {
-			uc, err = net.ListenPacket("udp6", ":0")
+			uc, err = lc.ListenPacket(context.Background(), "udp6", ":0")
 		}
 		if err != nil {
 			for _, rc := range resolverConns {

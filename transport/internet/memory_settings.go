@@ -3,6 +3,7 @@ package internet
 import (
 	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/transport/internet/finalmask"
+	"github.com/xtls/xray-core/transport/internet/socket"
 )
 
 // MemoryStreamConfig is a parsed form of StreamConfig. It is used to reduce the number of Protobuf parses.
@@ -15,7 +16,7 @@ type MemoryStreamConfig struct {
 	TcpmaskManager   *finalmask.TcpmaskManager
 	UdpmaskManager   *finalmask.UdpmaskManager
 	QuicParams       *QuicParams
-	SocketSettings   *SocketConfig
+	SocketSettings   *socket.SocketConfig
 	DownloadSettings *MemoryStreamConfig
 }
 
