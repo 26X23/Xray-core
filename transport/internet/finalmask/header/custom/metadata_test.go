@@ -150,7 +150,7 @@ func TestMetadataUDPWriteUsesRemotePort(t *testing.T) {
 	}
 	defer serverRaw.Close()
 
-	client, err := finalmask.NewUdpmaskManager([]finalmask.Udpmask{cfg}).WrapPacketConnClient(clientRaw)
+	client, err := finalmask.NewUdpmaskManager([]finalmask.Udpmask{cfg}).WrapPacketConnClient(clientRaw, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

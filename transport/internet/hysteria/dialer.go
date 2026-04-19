@@ -212,7 +212,7 @@ func (c *client) dial() error {
 	}
 
 	if c.udpmaskManager != nil {
-		pktConn, err = c.udpmaskManager.WrapPacketConnClient(pktConn)
+		pktConn, err = c.udpmaskManager.WrapPacketConnClient(pktConn, internet.NewPacketConnController(c.socketConfig))
 		if err != nil {
 			raw.Close()
 			return errors.New("mask err").Base(err)

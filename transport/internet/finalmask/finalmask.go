@@ -4,15 +4,18 @@ import (
 	"context"
 	"net"
 	"sync"
+	"syscall"
 
 	"github.com/xtls/xray-core/common/bytespool"
 	"github.com/xtls/xray-core/common/errors"
 )
 
+type PacketConnController = func(network, address, destAddress string, c syscall.RawConn) error
+
 type Udpmask interface {
 	UDP()
 
-	WrapPacketConnClient(raw net.PacketConn, level int, levelCount int) (net.PacketConn, error)
+	WrapPacketConnClient(raw net.PacketConn, controller PacketConnController, level int, levelCount int) (net.PacketConn, error)
 	WrapPacketConnServer(raw net.PacketConn, level int, levelCount int) (net.PacketConn, error)
 }
 
@@ -26,7 +29,7 @@ func NewUdpmaskManager(udpmasks []Udpmask) *UdpmaskManager {
 	}
 }
 
-func (m *UdpmaskManager) WrapPacketConnClient(raw net.PacketConn) (net.PacketConn, error) {
+func (m *UdpmaskManager) WrapPacketConnClient(raw net.PacketConn, controller PacketConnController) (net.PacketConn, error) {
 	var sizes []int
 	var conns []net.PacketConn
 	for i, mask := range m.udpmasks {
@@ -38,13 +41,13 @@ func (m *UdpmaskManager) WrapPacketConnClient(raw net.PacketConn) (net.PacketCon
 					conns = nil
 				}
 				var err error
-				raw, err = mask.WrapPacketConnClient(raw, i, len(m.udpmasks)-1)
+				raw, err = mask.WrapPacketConnClient(raw, controller, i, len(m.udpmasks)-1)
 				if err != nil {
 					return nil, err
 				}
 				continue
 			}
-			conn, err := mask.WrapPacketConnClient(nil, i, len(m.udpmasks)-1)
+			conn, err := mask.WrapPacketConnClient(nil, controller, i, len(m.udpmasks)-1)
 			if err != nil {
 				return nil, err
 			}
@@ -57,7 +60,7 @@ func (m *UdpmaskManager) WrapPacketConnClient(raw net.PacketConn) (net.PacketCon
 				conns = nil
 			}
 			var err error
-			raw, err = mask.WrapPacketConnClient(raw, i, len(m.udpmasks)-1)
+			raw, err = mask.WrapPacketConnClient(raw, controller, i, len(m.udpmasks)-1)
 			if err != nil {
 				return nil, err
 			}

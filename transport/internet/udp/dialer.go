@@ -27,7 +27,7 @@ func init() {
 			if streamSettings != nil && streamSettings.UdpmaskManager != nil {
 				switch c := conn.(type) {
 				case *internet.PacketConnWrapper:
-					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c.PacketConn)
+					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c.PacketConn, internet.NewPacketConnController(sockopt))
 					if err != nil {
 						conn.Close()
 						return nil, errors.New("mask err").Base(err)
@@ -35,7 +35,7 @@ func init() {
 					c.PacketConn = pktConn
 					errors.LogInfo(ctx, "finalmask udp dialer: wrapped existing PacketConnWrapper with ", reflect.TypeOf(pktConn))
 				case *net.UDPConn:
-					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c)
+					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c, internet.NewPacketConnController(sockopt))
 					if err != nil {
 						conn.Close()
 						return nil, errors.New("mask err").Base(err)
@@ -47,7 +47,7 @@ func init() {
 					errors.LogInfo(ctx, "finalmask udp dialer: wrapped UDPConn with ", reflect.TypeOf(pktConn))
 				case *cnc.Connection:
 					fakeConn := &internet.FakePacketConn{Conn: c}
-					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(fakeConn)
+					pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(fakeConn, internet.NewPacketConnController(sockopt))
 					if err != nil {
 						conn.Close()
 						return nil, errors.New("mask err").Base(err)

@@ -59,14 +59,14 @@ func DialKCP(ctx context.Context, dest net.Destination, streamSettings *internet
 	if streamSettings.UdpmaskManager != nil {
 		switch c := conn.(type) {
 		case *internet.PacketConnWrapper:
-			pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c.PacketConn)
+			pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c.PacketConn, internet.NewPacketConnController(streamSettings.SocketSettings))
 			if err != nil {
 				conn.Close()
 				return nil, errors.New("mask err").Base(err)
 			}
 			c.PacketConn = pktConn
 		case *net.UDPConn:
-			pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c)
+			pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(c, internet.NewPacketConnController(streamSettings.SocketSettings))
 			if err != nil {
 				conn.Close()
 				return nil, errors.New("mask err").Base(err)
@@ -77,7 +77,7 @@ func DialKCP(ctx context.Context, dest net.Destination, streamSettings *internet
 			}
 		case *cnc.Connection:
 			fakeConn := &internet.FakePacketConn{Conn: c}
-			pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(fakeConn)
+			pktConn, err := streamSettings.UdpmaskManager.WrapPacketConnClient(fakeConn, internet.NewPacketConnController(streamSettings.SocketSettings))
 			if err != nil {
 				conn.Close()
 				return nil, errors.New("mask err").Base(err)

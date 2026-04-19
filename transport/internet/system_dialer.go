@@ -26,6 +26,28 @@ type DefaultSystemDialer struct {
 	obm outbound.Manager
 }
 
+func NewPacketConnController(sockopt *SocketConfig) (func(network, address, destAddress string, c syscall.RawConn) error) {
+	return func(network, address, destAddress string, c syscall.RawConn) error {
+		for _, ctl := range Controllers {
+			if err := ctl(network, address, c); err != nil {
+				errors.LogInfoInner(context.Background(), err, "failed to apply external controller")
+			}
+		}
+		return c.Control(func(fd uintptr) {
+			if sockopt != nil {
+				if err := applyOutboundSocketOptions(network, destAddress, fd, sockopt); err != nil {
+					errors.LogInfoInner(context.Background(), err, "failed to apply socket options")
+				}
+				if hasBindAddr(sockopt) {
+					if err := bindAddr(fd, sockopt.BindAddress, sockopt.BindPort); err != nil {
+						errors.LogInfoInner(context.Background(), err, "failed to bind source address to ", sockopt.BindAddress)
+					}
+				}
+			}
+		})
+	}
+}
+
 func resolveSrcAddr(network net.Network, src net.Address) net.Addr {
 	if src == nil || src == net.AnyIP {
 		return nil

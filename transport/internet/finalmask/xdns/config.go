@@ -5,19 +5,20 @@ import (
 
 	"github.com/xtls/xray-core/common/errors"
 	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/finalmask"
 	"github.com/xtls/xray-core/transport/internet/hysteria/udphop"
 )
 
 func (c *Config) UDP() {
 }
 
-func (c *Config) WrapPacketConnClient(raw net.PacketConn, level int, levelCount int) (net.PacketConn, error) {
+func (c *Config) WrapPacketConnClient(raw net.PacketConn, controller finalmask.PacketConnController, level int, levelCount int) (net.PacketConn, error) {
 	_, ok1 := raw.(*internet.FakePacketConn)
 	_, ok2 := raw.(*udphop.UdpHopPacketConn)
 	if level != 0 || ok1 || ok2 {
 		return nil, errors.New("xdns requires being at the outermost level")
 	}
-	return NewConnClient(c, raw)
+	return NewConnClient(c, raw, controller)
 }
 
 func (c *Config) WrapPacketConnServer(raw net.PacketConn, level int, levelCount int) (net.PacketConn, error) {

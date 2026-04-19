@@ -4,6 +4,7 @@ import (
 	"net"
 
 	"github.com/xtls/xray-core/common/errors"
+	"github.com/xtls/xray-core/transport/internet/finalmask"
 )
 
 func (c *Config) TCP() {
@@ -42,7 +43,7 @@ func newPackedDirectionalConn(raw net.Conn, config *Config, readPacked bool) (ne
 	return newWrappedConn(raw, reader, writer), nil
 }
 
-func (c *Config) WrapPacketConnClient(raw net.PacketConn, level int, levelCount int) (net.PacketConn, error) {
+func (c *Config) WrapPacketConnClient(raw net.PacketConn, controller finalmask.PacketConnController, level int, levelCount int) (net.PacketConn, error) {
 	if level != levelCount {
 		return nil, errors.New("sudoku udp mask must be the innermost mask in chain")
 	}

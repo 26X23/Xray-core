@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/xtls/xray-core/common"
@@ -37,7 +38,6 @@ type packet struct {
 }
 
 type xdnsConnClient struct {
-	conn          net.PacketConn
 	resolverConns []net.PacketConn
 	resolverAddrs []*net.UDPAddr
 	resolverIdx   uint32
@@ -54,7 +54,7 @@ type xdnsConnClient struct {
 	mutex  sync.Mutex
 }
 
-func NewConnClient(c *Config, raw net.PacketConn) (net.PacketConn, error) {
+func NewConnClient(c *Config, raw net.PacketConn, controller finalmask.PacketConnController) (net.PacketConn, error) {
 	if len(c.Resolvers) == 0 {
 		return nil, errors.New("empty resolvers")
 	}
@@ -90,17 +90,30 @@ func NewConnClient(c *Config, raw net.PacketConn) (net.PacketConn, error) {
 		if port == 0 {
 			return nil, errors.New("invalid port")
 		}
+
 		var uc net.PacketConn
-		if ip.To4() != nil {
-			uc, err = net.ListenPacket("udp4", ":0")
+		if raw != nil {
+			uc = raw
+			raw = nil
 		} else {
-			uc, err = net.ListenPacket("udp6", ":0")
-		}
-		if err != nil {
-			for _, rc := range resolverConns {
-				rc.Close()
+			var lc net.ListenConfig
+			if controller != nil {
+				lc.Control = func(network, address string, c syscall.RawConn) error {
+					return controller(network, address, rs, c)
+				}
 			}
-			return nil, errors.New("failed to create resolver socket: ", err)
+
+			if ip.To4() != nil {
+				uc, err = lc.ListenPacket(context.Background(), "udp4", ":0")
+			} else {
+				uc, err = lc.ListenPacket(context.Background(), "udp6", ":0")
+			}
+			if err != nil {
+				for _, rc := range resolverConns {
+					rc.Close()
+				}
+				return nil, errors.New("failed to create resolver socket: ", err)
+			}
 		}
 		resolverConns = append(resolverConns, uc)
 		resolverAddrs = append(resolverAddrs, &net.UDPAddr{IP: ip, Port: port})
@@ -108,7 +121,6 @@ func NewConnClient(c *Config, raw net.PacketConn) (net.PacketConn, error) {
 	resolverSend = make([]atomic.Uint32, len(resolverConns))
 
 	conn := &xdnsConnClient{
-		conn:          raw,
 		resolverConns: resolverConns,
 		resolverAddrs: resolverAddrs,
 		resolverSend:  resolverSend,
@@ -310,35 +322,50 @@ func (c *xdnsConnClient) WriteTo(p []byte, addr net.Addr) (n int, err error) {
 
 func (c *xdnsConnClient) Close() error {
 	c.closed = true
+	var err error
 	for _, rc := range c.resolverConns {
-		rc.Close()
+		if err2 := rc.Close(); err2 != nil {
+			err = err2
+		}
 	}
-	return c.conn.Close()
+	return err
 }
 
 func (c *xdnsConnClient) LocalAddr() net.Addr {
-	return c.conn.LocalAddr()
+	if len(c.resolverConns) > 0 {
+		return c.resolverConns[0].LocalAddr()
+	}
+	return &net.UDPAddr{IP: []byte{0, 0, 0, 0}, Port: 0};
 }
 
 func (c *xdnsConnClient) SetDeadline(t time.Time) error {
+	var err error
 	for _, rc := range c.resolverConns {
-		rc.SetDeadline(t)
+		if err2 := rc.SetDeadline(t); err2 != nil {
+			err = err2
+		}
 	}
-	return c.conn.SetDeadline(t)
+	return err
 }
 
 func (c *xdnsConnClient) SetReadDeadline(t time.Time) error {
+	var err error
 	for _, rc := range c.resolverConns {
-		rc.SetReadDeadline(t)
+		if err2 := rc.SetReadDeadline(t); err2 != nil {
+			err = err2
+		}
 	}
-	return c.conn.SetReadDeadline(t)
+	return err
 }
 
 func (c *xdnsConnClient) SetWriteDeadline(t time.Time) error {
+	var err error
 	for _, rc := range c.resolverConns {
-		rc.SetWriteDeadline(t)
+		if err2 := rc.SetWriteDeadline(t); err2 != nil {
+			err = err2
+		}
 	}
-	return c.conn.SetWriteDeadline(t)
+	return err
 }
 
 func encode(p []byte, clientID []byte, domain Name) ([]byte, error) {
